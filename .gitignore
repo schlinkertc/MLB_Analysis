@@ -137,3 +137,4 @@ dmypy.json
 config.py
 recycling_bin.py
 models
+*.db
