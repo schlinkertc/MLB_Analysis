@@ -281,9 +281,9 @@ class Play(Base):
             self.halfInning=about['halfInning']
             self.inning=about['inning']
             
-            self.startTime=datetime.time(datetime.strptime(about.get('startTime','1900-01-01T01:01:1.0Z'),'%Y-%m-%dT%H:%M:%S.%fZ'))
+            self.startTime=datetime.strptime(about.get('startTime','1900-01-01T01:01:1.0Z'),'%Y-%m-%dT%H:%M:%S.%fZ')
             
-            self.endTime=datetime.time(datetime.strptime(about.get('endTime','1900-01-01T01:01:01.0Z'),'%Y-%m-%dT%H:%M:%S.%fZ'))
+            self.endTime=datetime.strptime(about.get('endTime','1900-01-01T01:01:01.0Z'),'%Y-%m-%dT%H:%M:%S.%fZ')
             
             self.isComplete=about.get('isComplete','null')
             self.isScoringPlay=about.get('isScoringPlay','null')
@@ -327,8 +327,8 @@ class Play(Base):
     atBatIndex = Column(Integer)
     halfInning = Column(String(10))
     inning = Column(Integer)
-    startTime = Column(Time)
-    endTime = Column(Time)
+    startTime = Column(DateTime)
+    endTime = Column(DateTime)
     isComplete = Column(Boolean)
     isScoringPlay = Column(Boolean)
     hasReview = Column(Boolean)
@@ -666,3 +666,5 @@ class GameTeamLink(Base):
 # update game and team tables 
 Game.teams = relationship("GameTeamLink",back_populates='game')
 Team.games = relationship("GameTeamLink",back_populates='team')
+
+Base.metadata.create_all(db.db_engine)
