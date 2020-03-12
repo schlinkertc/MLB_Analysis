@@ -668,3 +668,10 @@ Game.teams = relationship("GameTeamLink",back_populates='game')
 Team.games = relationship("GameTeamLink",back_populates='team')
 
 Base.metadata.create_all(db.db_engine)
+
+# Create visualization
+import sqlalchemy_schemadisplay
+from sqlalchemy import MetaData
+
+schema_viz = sqlalchemy_schemadisplay.create_schema_graph(metadata=MetaData(db.db_engine))
+schema_viz.write_png('dbschema.png')
