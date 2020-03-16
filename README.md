@@ -32,7 +32,7 @@ The Colorado Rockies play their home games at Coors Field where the altitude is 
 
 ### Predicting Game Winners
 
-[Branch Rickey. Life Magazine, 1954](images/Rickey_obp.jpg)
+![Branch Rickey. Life Magazine, 1954](images/Rickey_obp.jpg)
 
 
 ### Predicting the Next Pitch 
