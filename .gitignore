@@ -134,7 +134,10 @@ dmypy.json
 *.pytest_cache
 *.pyc
 *__pycache__
+
+#personal additions
 config.py
 recycling_bin.py
 models
 *.db
+*.pkl
