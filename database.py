@@ -113,5 +113,55 @@ class Play(Base):
     def __init__(self,dictionary):
         for k,v in dictionary.items():
             setattr(self,k,v)
-        
+            
+class Pitch(Base):
+    __tablename__ = 'pitches'
+    __table_args__ = (
+        PrimaryKeyConstraint('atBatIndex','playEndTime','index'),
+        {'extend_existing':True}
+    )
+    
+    gamePk = Column(Integer)
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    index = Column(Integer)
+    playId = Column(String)
+    pitchNumber = Column(Integer)
+    startTime = Column(String)
+    endTime = Column(String)
+    isPitch = Column(Boolean)
+    type = Column(String)
+    details_description = Column(String)
+    details_code
+    details_ballColor
+    details_isInPlay
+    details_isStrike
+    details_isBall
+    details_hasReview
+    count_balls
+    count_strikes
+    details_call_code
+    details_call_description
+    pfxID
+    details_trailColor
+    details_type_code
+    details_type_description
+    details_fromCatcher
+    details_runnerGoing
+    
+class PitchData(Base):
+    __tablename__ = 'pitch_data'
+    __table_args__ = (
+        PrimaryKeyConstraint('atBatIndex','playEndTime','index'),
+        {'extend_existing':True}
+    )
+    
+    gamePk = Column(Integer)
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    index = Column(Integer)
+    
+    
+    
+    
             
