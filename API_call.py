@@ -2,29 +2,29 @@ import statsapi as mlb
 from datetime import datetime as dt
 import os,re,csv
 from os import walk
+import pandas as pd
+import joblib 
+import copy 
 
 def get_game(api_call):
         gameData = api_call['gameData']
         dateTime = gameData['datetime']
         game = gameData['game']
         weather = gameData['weather']
-        timeZone = gameData['venue']['timeZone']
         status = gameData['status']
         probablePitchers = gameData['probablePitchers']
 
         keys_to_add = ['dateTime','originalDate',
                        'condition','temp','wind',
-                       'tz','detailedState'
+                       'detailedState'
                       ]
-        dicts = [weather,dateTime,timeZone,status]
+        dicts = [weather,dateTime,status]
         for k in keys_to_add:
             for d in dicts:
                 try:
                     game[k]=d[k]
                 except KeyError:
                     continue
-        #'seasonDisplay' key:value seems to be redundant
-        del game['seasonDisplay']
 
         home_team = gameData['teams']['home']
         away_team = gameData['teams']['away']
@@ -75,7 +75,7 @@ def get_plays(API_result):
     for play in allPlays:
         play_dict = {k:v for k,v in zip(keys,[play[key] for key in keys])}.copy()
         plays.append(flatten_dicts(play_dict))
-        matchup = play.pop('matchup')
+        matchup = play.copy().pop('matchup')
         #foreign keys to play 'atBatIndex', 'playEndTime'
         fks=['atBatIndex', 'playEndTime']
             
@@ -83,11 +83,11 @@ def get_plays(API_result):
             {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
         )
         for x in ['pitcher','batter']:
-            hotColdZone =  matchup.pop(f"{x}HotColdZones")
+            hotColdZone =  matchup.copy().pop(f"{x}HotColdZones")
             for zone in hotColdZone:
                 try:
                     zone.update(
-                        matchup.pop(f'{x}HotColdZoneStats')
+                        matchup.copy().pop(f'{x}HotColdZoneStats')
                     )
                 except KeyError:
                     pass
@@ -106,7 +106,7 @@ def get_plays(API_result):
     hotColdStats = []
     for hc in hotColdZones:
         try:
-            stats = hc.pop('stats')
+            stats = hc.copy().pop('stats')
         except KeyError:
             continue
         for stat in stats:
@@ -158,7 +158,7 @@ def get_runners(API_result):
                 {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
             )
             try:
-                temp_credits = runner.pop('credits')
+                temp_credits = runner.copy().pop('credits')
                 
                 for credit in temp_credits:
                     credit.update({k:v for k,v in zip(fks,[play[fk] for fk in fks])})
@@ -216,7 +216,7 @@ def get_teams(API_result):
     links = []
     team_records = []
     for key in ['home','away']:
-        team = teams_dict[key]
+        team = teams_dict[key].copy()
         
         team_record = team.pop('record')
         team_record.update({'gamePk':gamePk})
@@ -237,16 +237,69 @@ def get_venue(API_result):
 
 class API_call():
     
+    pickled_calls = []
+    for (dirpath, dirnames, filenames) in walk('API_results/'):
+        pickled_calls.extend(filenames)
+        break
+    pickled_calls = [x.strip('.pkl') for x in pickled_calls]
+    
     def __init__(self,gamePk):
-        self._result = mlb.get('game',{'gamePk':gamePk})
-        self.game = get_game(self._result)
-        self.venue = get_venue(self._result)
-        self.teams, self.game_team_links, self.team_records = get_teams(self._result)
-        self.players, self.game_player_links = get_players(self._result)
-        self.plays,self.matchups,self.hotColdZones,self.hotColdStats = get_plays(self._result)
-        self.actions = get_actions(self._result)
-        self.pitches = get_pitches(self._result)
-        self.runners, self.credits = get_runners(self._result)
+        
+        storedResultsDirectory = "API_results/"
+        self._pickle_path = str(storedResultsDirectory+gamePk+'.pkl')
+        
+        if gamePk in API_call.pickled_calls:
+            self._result = joblib.load(self._pickle_path)
+        else:
+            self._result = mlb.get('game',{'gamePk':gamePk})
+            self._pickle = joblib.dump(self._result,self._pickle_path)
+            API_call.pickled_calls.append(gamePk)
+        
+        # I don't want to change the underlying api response
+        result = copy.deepcopy(self._result)
+        
+        self.game = get_game(result)
+        self.venue = get_venue(result)
+        self.teams, self.game_team_links, self.team_records = get_teams(result)
+        self.players, self.game_player_links = get_players(result)
+        self.plays,self.matchups,self.hotColdZones,self.hotColdStats = get_plays(result)
+        self.actions = get_actions(result)
+        self.pitches = get_pitches(result)
+        self.runners, self.credits = get_runners(result)
+        
+class Games_DataFrames():
+
+    def __init__(gamePks):
+        """
+        takes in a list of gamePks, instantiates API_call object for each game, 
+            returns dataframes for db inserts
+        """
+        
+
+# for later: update game_player_links with teamIds        
+def get_roster_inputs(api_call):
+    return {
+        'season':api_call.game['season'],
+        'rosterType':'active',
+        'date':api_call.game['dateTime'].strftime("%m/%d/%Y")
+    }
+
+def update_gamePlayerLinks(game):
+    roster_inputs = get_roster_inputs(game)
+    players =  {}
+    for team in game.teams:
+        params = get_roster_inputs(call)
+        params.update({"teamId":team['id']})
+        roster = mlb.get('team_roster',params)
+        team_players = [x['person']['id'] for x in roster['roster']]
+        players[team['id']] = team_players
+
+    for d in game.game_player_links:
+        for k in players.keys():
+            if d['player'] in players[k]:
+                d.update({'teamId':k})    
+        
+        
         
         
     

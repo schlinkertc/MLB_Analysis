@@ -29,7 +29,7 @@ class MyDatabase:
 from sqlalchemy import PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
-from sqlalchemy import Table,Column,Integer,String,DateTime,Date,Boolean
+from sqlalchemy import Table,Column,Integer,String,DateTime,Date,Boolean,Float
 
 class Game(Base):
     __tablename__ = 'games'
@@ -117,7 +117,7 @@ class Play(Base):
 class Pitch(Base):
     __tablename__ = 'pitches'
     __table_args__ = (
-        PrimaryKeyConstraint('atBatIndex','playEndTime','index'),
+        PrimaryKeyConstraint('atBatIndex','playEndTime','index','gamePk'),
         {'extend_existing':True}
     )
     
@@ -132,27 +132,35 @@ class Pitch(Base):
     isPitch = Column(Boolean)
     type = Column(String)
     details_description = Column(String)
-    details_code
-    details_ballColor
-    details_isInPlay
-    details_isStrike
-    details_isBall
-    details_hasReview
-    count_balls
-    count_strikes
-    details_call_code
-    details_call_description
-    pfxID
-    details_trailColor
-    details_type_code
-    details_type_description
-    details_fromCatcher
-    details_runnerGoing
+    details_code = Column(String)
+    details_ballColor = Column(String)
+    details_isInPlay = Column(String)
+    details_isStrike = Column(Boolean)
+    details_isBall = Column(Boolean)
+    details_hasReview = Column(Boolean)
+    count_balls = Column(Integer)
+    count_strikes = Column(Integer)
+    details_call_code = Column(String)
+    details_call_description = Column(String)
+    pfxID = Column(String)
+    details_trailColor = Column(String)
+    details_type_code = Column(String)
+    details_type_description = Column(String)
+    details_fromCatcher = Column(String)
+    details_runnerGoing = Column(Boolean)
+    
+    def __init__(self,dictionary):
+        for k,v in dictionary.items():
+            setattr(self,k,v)
+            
+    def __repr__(self): 
+        return "<Pitch(gamePk='%s',atBatIndex='%s', endTime = '%s', index = '%s')>" % (
+                        self.gamePk, self.about_atBatIndex, self.about_endTime, self.index)
     
 class PitchData(Base):
     __tablename__ = 'pitch_data'
     __table_args__ = (
-        PrimaryKeyConstraint('atBatIndex','playEndTime','index'),
+        PrimaryKeyConstraint('atBatIndex','playEndTime','index','gamePk'),
         {'extend_existing':True}
     )
     
@@ -161,7 +169,65 @@ class PitchData(Base):
     playEndTime = Column(String)
     index = Column(Integer)
     
+    startSpeed = Column(Float)
+    endSpeed = Column(Float)
+    strikeZoneTop = Column(Float)
+    zone = Column(Float)
+    typeConfidence = Column(Float)
+    plateTime = Column(Float)
+    extension = Column(Float)
+    coordinates_aY = Column(Float)
+    coordinates_aZ = Column(Float)
+    coordinates_pfxX = Column(Float)
+    coordinates_pfxZ = Column(Float)
+    coordinates_pX = Column(Float)
+    coordinates_pZ = Column(Float)
+    coordinates_vX0 = Column(Float)
+    coordinates_vY0 = Column(Float)
+    coordinates_vZ0 = Column(Float)
+    coordinates_x = Column(Float)
+    coordinates_y = Column(Float)
+    coordinates_x0 = Column(Float)
+    coordinates_y0 = Column(Float)
+    coordinates_z0 = Column(Float)
+    coordinates_aX = Column(Float)
+    breaks_breakY = Column(Float)
+    breaks_spinRate = Column(Float)
+    breaks_spinDirection = Column(Float)
     
-    
-    
+    def __init__(self,dictionary):
+        for k,v in dictionary.items():
+            setattr(self,k,v)
             
+    def __repr__(self): 
+        return "<PitchData(gamePk='%s',atBatIndex='%s', endTime = '%s', index = '%s')>" % (
+                        self.gamePk, self.about_atBatIndex, self.about_endTime, self.index)
+    
+class HitData(Base):
+    __tablename__ = 'hit_data'
+    __table_args__ = (
+        PrimaryKeyConstraint('atBatIndex','playEndTime','index','gamePk'),
+        {'extend_existing':True}
+    )
+    
+    gamePk = Column(Integer)
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    index = Column(Integer)
+    
+    launchSpeed = Column(Float)
+    launchAngle = Column(Float)
+    totalDistance = Column(Float)
+    trajectory = Column(String)
+    location = Column(String)
+    coordinates_coordX = Column(Float)
+    coordinates_coordY = Column(Float)
+    hardness = Column(String)
+        
+    def __init__(self,dictionary):
+        for k,v in dictionary.items():
+            setattr(self,k,v)
+            
+    def __repr__(self): 
+        return "<HitData(gamePk='%s',atBatIndex='%s', endTime = '%s', index = '%s')>" % (
+                        self.gamePk, self.about_atBatIndex, self.about_endTime, self.index)
