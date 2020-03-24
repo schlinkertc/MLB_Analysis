@@ -45,8 +45,11 @@ def get_game(api_call):
         game['dateTime'] = dt.strptime(game['dateTime'],fmt)
         fmt = "%Y-%m-%d"
         game['originalDate'] = dt.strptime(game['originalDate'],fmt).date()
-
-        return game
+        
+        #put it in a list for consistency with other records
+        list_game = []
+        list_game.append(game)
+        return list_game
 
 def flatten_dicts(dictionary):
     """
@@ -83,11 +86,11 @@ def get_plays(API_result):
             {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
         )
         for x in ['pitcher','batter']:
-            hotColdZone =  matchup.copy().pop(f"{x}HotColdZones")
+            hotColdZone =  matchup.pop(f"{x}HotColdZones")
             for zone in hotColdZone:
                 try:
                     zone.update(
-                        matchup.copy().pop(f'{x}HotColdZoneStats')
+                        matchup.pop(f'{x}HotColdZoneStats')
                     )
                 except KeyError:
                     pass
@@ -106,7 +109,7 @@ def get_plays(API_result):
     hotColdStats = []
     for hc in hotColdZones:
         try:
-            stats = hc.copy().pop('stats')
+            stats = hc.pop('stats')
         except KeyError:
             continue
         for stat in stats:
@@ -158,7 +161,7 @@ def get_runners(API_result):
                 {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
             )
             try:
-                temp_credits = runner.copy().pop('credits')
+                temp_credits = runner.pop('credits')
                 
                 for credit in temp_credits:
                     credit.update({k:v for k,v in zip(fks,[play[fk] for fk in fks])})
@@ -233,7 +236,12 @@ def get_teams(API_result):
 
 def get_venue(API_result):
     venue = API_result['gameData']['venue']
-    return flatten_dicts(venue)
+    venue = flatten_dicts(venue)
+    
+    #put it in a list for consistency
+    venue_list = []
+    venue_list.append(venue)
+    return venue_list
 
 class API_call():
     
@@ -269,11 +277,35 @@ class API_call():
         
 class Games_DataFrames():
 
-    def __init__(gamePks):
+    def __init__(self,gamePks):
         """
         takes in a list of gamePks, instantiates API_call object for each game, 
             returns dataframes for db inserts
         """
+        self._calls = [API_call(gamePk) for gamePk in gamePks]
+        call_dict = {k:v for k,v in self._calls[0].__dict__.items() if k[0]!= '_'}
+        
+        for k in call_dict.keys():
+            if type(call_dict[k])==dict:
+                v = []
+                v.append(call_dict[k])
+                call_dict[k]=v
+        for call in self._calls[1:]:
+            for k,v in call.__dict__.items():
+                try:
+                    call_dict[k].extend(v)
+                except KeyError:
+                    pass
+        
+        for k,v in call_dict.items():
+            setattr(self,k,v)
+        for k,v in self.__dict__.items():
+            if k[0] != '_':
+                try:
+                    setattr(self,k,pd.DataFrame.from_records(v))
+                except AttributeError:
+                    pass
+                    
         
 
 # for later: update game_player_links with teamIds        
