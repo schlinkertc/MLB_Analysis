@@ -199,31 +199,31 @@ class PitchData(Base):
     playEndTime = Column(String)
     index = Column(Integer)
     
-    pitchData_startSpeed = Column(Float)
-    pitchData_endSpeed = Column(Float)
-    pitchData_strikeZoneTop = Column(Float)
-    pitchData_zone = Column(Float)
-    pitchData_typeConfidence = Column(Float)
-    pitchData_plateTime = Column(Float)
-    pitchData_extension = Column(Float)
-    pitchData_coordinates_aY = Column(Float)
-    pitchData_coordinates_aZ = Column(Float)
-    pitchData_coordinates_pfxX = Column(Float)
-    pitchData_coordinates_pfxZ = Column(Float)
-    pitchData_coordinates_pX = Column(Float)
-    pitchData_coordinates_pZ = Column(Float)
-    pitchData_coordinates_vX0 = Column(Float)
-    pitchData_coordinates_vY0 = Column(Float)
-    pitchData_coordinates_vZ0 = Column(Float)
-    pitchData_coordinates_x = Column(Float)
-    pitchData_coordinates_y = Column(Float)
-    pitchData_coordinates_x0 = Column(Float)
-    pitchData_coordinates_y0 = Column(Float)
-    pitchData_coordinates_z0 = Column(Float)
-    pitchData_coordinates_aX = Column(Float)
-    pitchData_breaks_breakY = Column(Float)
-    pitchData_breaks_spinRate = Column(Float)
-    pitchData_breaks_spinDirection = Column(Float)
+    startSpeed = Column('pitchData_startSpeed',Float)
+    endSpeed = Column('pitchData_endSpeed',Float)
+    strikeZoneTop = Column('pitchData_strikeZoneTop',Float)
+    zone = Column('pitchData_zone',Float)
+    typeConfidence = Column('pitchData_typeConfidence',Float)
+    plateTime = Column('pitchData_plateTime',Float)
+    extension = Column('pitchData_extension',Float)
+    coordinates_aY = Column('pitchData_coordinates_aY',Float)
+    coordinates_aZ = Column('pitchData_coordinates_aZ',Float)
+    coordinates_pfxX = Column('pitchData_coordinates_pfxX',Float)
+    coordinates_pfxZ = Column('pitchData_coordinates_pfxZ',Float)
+    coordinates_pX = Column('pitchData_coordinates_pX',Float)
+    coordinates_pZ = Column('pitchData_coordinates_pZ',Float)
+    coordinates_vX0 = Column('pitchData_coordinates_vX0',Float)
+    coordinates_vY0 = Column('pitchData_coordinates_vY0',Float)
+    coordinates_vZ0 = Column('pitchData_coordinates_vZ0',Float)
+    coordinates_x = Column('pitchData_coordinates_x',Float)
+    coordinates_y = Column('pitchData_coordinates_y',Float)
+    coordinates_x0 = Column('pitchData_coordinates_x0',Float)
+    coordinates_y0 = Column('pitchData_coordinates_y0',Float)
+    coordinates_z0 = Column('pitchData_coordinates_z0',Float)
+    coordinates_aX = Column('pitchData_coordinates_aX',Float)
+    breaks_breakY = Column('pitchData_breaks_breakY',Float)
+    breaks_spinRate = Column('pitchData_breaks_spinRate',Float)
+    breaks_spinDirection = Column('pitchData_breaks_spinDirection',Float)
     
     def __init__(self,dictionary):
         for k,v in dictionary.items():
@@ -259,14 +259,14 @@ class HitData(Base):
     playEndTime = Column(String)
     index = Column(Integer)
     
-    hitData_launchSpeed = Column(Float)
-    hitData_launchAngle = Column(Float)
-    hitData_totalDistance = Column(Float)
-    hitData_trajectory = Column(String)
-    hitData_location = Column(String)
-    hitData_coordinates_coordX = Column(Float)
-    hitData_coordinates_coordY = Column(Float)
-    hitData_hardness = Column(String)
+    launchSpeed = Column('hitData_launchSpeed',Float)
+    launchAngle = Column('hitData_launchAngle',Float)
+    totalDistance = Column('hitData_totalDistance',Float)
+    trajectory = Column('hitData_trajectory',String)
+    location = Column('hitData_location',String)
+    coordinates_coordX = Column('hitData_coordinates_coordX',Float)
+    coordinates_coordY = Column('hitData_coordinates_coordY',Float)
+    hardness = Column('hitData_hardness',String)
         
     def __init__(self,dictionary):
         for k,v in dictionary.items():
@@ -276,9 +276,28 @@ class HitData(Base):
         return "<HitData(gamePk='%s',atBatIndex='%s', endTime = '%s', index = '%s')>" % (
                         self.gamePk, self.atBatIndex, self.playEndTime, self.index)
     
-                                        ###################
-                                        ## RELATIONSHIPS ##
-                                        ###################
+class Venue(Base):
+    __tablename__ = 'venues'
+    __table_args__ = (
+        PrimaryKeyConstraint('id'),
+        {'extend_existing':True}
+    )
+    id = Column(Integer)
+    name = Column(String)
+    location_city = Column(String)
+    location_state = Column(String)
+    location_latitude = Column('location_defaultCoordinates_latitude',Float)
+    location_longitude = Column('location_defaultCoordinates_longitude',Float)
+    timeZone_id = Column(String)
+    timeZone_offset = Column(Integer)
+    fieldInfo_
+    
+###################
+
+## RELATIONSHIPS ##
+
+###################
+
 from sqlalchemy.orm import relationship
 
 # one-to-many between game and plays
