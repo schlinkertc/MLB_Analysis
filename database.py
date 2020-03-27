@@ -74,6 +74,7 @@ class Game(Base):
     def __init__(self,dictionary):
         for k,v in dictionary.items():
             setattr(self,k,v)
+
 class Play(Base):
     __tablename__ = 'plays'
     __table_args__ = (
@@ -237,7 +238,7 @@ class HitData(Base):
     __tablename__ = 'hit_data'
     __table_args__ = (
         PrimaryKeyConstraint(
-        'atBatIndex','playEndTime','index'
+        'atBatIndex','playEndTime','index','gamePk'
         ),
         ForeignKeyConstraint(
             columns=['gamePk'],
@@ -276,6 +277,166 @@ class HitData(Base):
         return "<HitData(gamePk='%s',atBatIndex='%s', endTime = '%s', index = '%s')>" % (
                         self.gamePk, self.atBatIndex, self.playEndTime, self.index)
     
+class Action(Base):
+    __tablename__ = 'actions'
+    __table_args__ = (
+        PrimaryKeyConstraint(
+        'atBatIndex','playEndTime','index','gamePk'
+        ),
+        ForeignKeyConstraint(
+            columns=['gamePk'],
+            refcolumns=['games.pk']
+        ),
+        ForeignKeyConstraint(
+            columns=['atBatIndex','playEndTime'],
+            refcolumns=['plays.about_atBatIndex','plays.about_endTime']
+        ),
+        ForeignKeyConstraint(
+            columns=['player_id'],
+            refcolumns=['players.id']
+        ),
+        ForeignKeyConstraint(
+            columns=['reviewDetails_challengeTeamId'],
+            refcolumns=['teams.id']
+        ),
+        {'extend_existing':True}
+    )
+    gamePk = Column(Integer)
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    index = Column(Integer)
+    
+    startTime = Column(String)
+    endTime = Column(String)
+    isPitch = Column(Boolean)
+    type = Column(String)
+    details_description = Column(String)
+    details_event = Column(String)
+    details_eventType = Column(String)
+    details_awayScore = Column(Integer)
+    details_homeScore = Column(Integer)
+    details_isScoringPlay = Column(Boolean)
+    details_hasReview = Column(Boolean)
+    count_balls = Column(Integer)
+    count_strikes = Column(Integer)
+    count_outs = Column(Integer)
+    player_id = Column(Integer)
+    battingOrder = Column(Integer)
+    position_code = Column(Integer)
+    base = Column(Integer)
+    injuryType = Column(String)
+    actionPlayId = Column(String)
+    reviewDetails_isOverturned = Column(Boolean)
+    reviewDetails_reviewType = Column(String)
+    reviewDetails_challengeTeamId = Column(Integer)
+    
+class Runner(Base):
+    __tablename__ = 'runners'
+    __table_args__ = (
+        PrimaryKeyConstraint(
+            'atBatIndex','playEndTime','gamePk','details_playIndex','details_runner_id',
+            'movement_start'
+        ),
+        ForeignKeyConstraint(
+            columns=['gamePk'],
+            refcolumns=['games.pk']
+        ),
+        ForeignKeyConstraint(
+            columns=['details_responsiblePitcher_id'],
+            refcolumns=['players.id']
+        ),
+        ForeignKeyConstraint(
+            columns=['details_runner_id'],
+            refcolumns=['players.id']
+        ),
+        ForeignKeyConstraint(
+            columns=['atBatIndex','playEndTime','gamePk','details_playIndex'],
+            refcolumns=['pitches.atBatIndex','pitches.playEndTime','pitches.gamePk','pitches.index']
+        ),
+        {'extend_existing':True}
+    )
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+        
+    movement_start = Column(String)
+    movement_end = Column(String)
+    movement_outBase = Column(String)
+    movement_isOut = Column(Boolean)
+    movement_outNumber = Column(Integer)
+    details_event = Column(String)
+    details_eventType = Column(String)
+    details_movementReason = Column(String)
+    details_responsiblePitcher_id = Column(Integer)
+    details_isScoringEvent = Column(Boolean)
+    details_rbi = Column(Boolean)
+    details_earned = Column(Boolean)
+    details_teamUnearned = Column(Boolean)
+    details_playIndex = Column(Integer)
+    details_runner_id = Column(Integer)
+    gamePk = Column(Integer)
+        
+class Credit(Base):
+    __tablename__ = 'credits'
+    __table_args__ = (
+        PrimaryKeyConstraint(
+            'atBatIndex','playEndTime',
+            'gamePk','player_id',sqlite_on_conflict='IGNORE'
+        ),
+        ForeignKeyConstraint(
+            columns=['gamePk'],
+            refcolumns=['games.pk']
+        ),
+        ForeignKeyConstraint(
+            columns=['player_id'],
+            refcolumns=['players.id']
+        ),
+        ForeignKeyConstraint(
+            columns=['atBatIndex','playEndTime','gamePk'],
+            refcolumns=['plays.about_atBatIndex','plays.about_endTime','plays.gamePk']
+        ),
+        {'extend_existing':True}
+    )
+    
+    credit = Column(String)
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    player_id = Column(Integer)
+    position_code = Column(String)
+    gamePk = Column(Integer)
+    
+class Matchup(Base):
+    __tablename__ = 'matchups'
+    __table_args__ = (
+        PrimaryKeyConstraint(
+            'atBatIndex','playEndTime','gamePk'
+        ),
+        ForeignKeyConstraint(
+            columns=['gamePk'],
+            refcolumns=['games.pk']
+        ),
+        ForeignKeyConstraint(
+            columns=['atBatIndex','playEndTime','gamePk'],
+            refcolumns=['plays.about_atBatIndex','plays.about_endTime','plays.gamePk']
+        ),
+        ForeignKeyConstraint(columns=['batter_id'],refcolumns=['players.id']),
+        ForeignKeyConstraint(columns=['pitcher_id'],refcolumns=['players.id']),
+        ForeignKeyConstraint(columns=['postOnFirst_id'],refcolumns=['players.id']),
+        ForeignKeyConstraint(columns=['postOnSecond_id'],refcolumns=['players.id']),
+        ForeignKeyConstraint(columns=['postOnThird_id'],refcolumns=['players.id']),
+        {'extend_existing':True}
+    )
+    atBatIndex = Column(Integer)
+    playEndTime = Column(String)
+    batter_id = Column(Integer)
+    pitcher_id = Column(Integer)
+    splits_batter = Column(String)
+    splits_pitcher = Column(String)
+    splits_menOnBase = Column(String)
+    gamePk = Column(Integer)
+    postOnFirst_id = Column(Integer)
+    postOnSecond_id = Column(Integer)
+    postOnThird_id = Column(Integer)
+    
 class Venue(Base):
     __tablename__ = 'venues'
     __table_args__ = (
@@ -286,11 +447,123 @@ class Venue(Base):
     name = Column(String)
     location_city = Column(String)
     location_state = Column(String)
+    location_country = Column(String)
     location_latitude = Column('location_defaultCoordinates_latitude',Float)
     location_longitude = Column('location_defaultCoordinates_longitude',Float)
     timeZone_id = Column(String)
     timeZone_offset = Column(Integer)
-    fieldInfo_
+    fieldInfo_capacity = Column(Integer)
+    fieldInfo_turfType = Column(String)
+    fieldInfo_roofType = Column(String)
+    fieldInfo_leftLine = Column(Integer)
+    fieldInfo_leftCenter = Column(Float)
+    fieldInfo_center = Column(Integer)
+    fieldInfo_rightCenter = Column(Float)
+    fieldInfo_rightLine = Column(Integer)
+    fieldInfo_left = Column(Float)
+    fieldInfo_right = Column(Float)
+    
+class Team(Base):
+    __tablename__ = 'teams'
+    __table_args__ = (
+        PrimaryKeyConstraint('id'),
+        ForeignKeyConstraint(columns=['venue_id'],refcolumns=['venues.id']),
+        {'extend_existing':True}
+    )
+    
+    id = Column(Integer)
+    name = Column(String)
+    abbreviation = Column(String)
+    teamName = Column(String)
+    locationName = Column(String)
+    firstYearOfPlay = Column(String)
+    shortName = Column(String)
+    active = Column(Boolean)
+    venue_id = Column(Integer)
+    league_name = Column(String)
+    division_name = Column(String)
+    springLeague_name = Column(String)
+    
+class GameTeamLink(Base):
+    __tablename__ = 'game_team_links'
+    __table_args__ = (
+        PrimaryKeyConstraint('gamePk','team_id'),
+        ForeignKeyConstraint(columns=['gamePk'],refcolumns=['games.pk']),
+        ForeignKeyConstraint(columns=['team_id'],refcolumns=['teams.id']),
+        {'extend_existing':True}
+    )
+    gamePk = Column(Integer)
+    team_id = Column(Integer)
+    home_away = Column(String)
+    
+class TeamRecord(Base):
+    __tablename__ = 'team_records'
+    __table_args__ = (
+        PrimaryKeyConstraint('gamePk','team_id'),
+        ForeignKeyConstraint(columns=['gamePk'],refcolumns=['games.pk']),
+        ForeignKeyConstraint(columns=['team_id'],refcolumns=['teams.id']),
+        {'extend_existing':True}
+    )
+        
+    gamesPlayed = Column(Integer)
+    wildCardGamesBack = Column(String)
+    leagueGamesBack = Column(String)
+    divisionGamesBack = Column(String)
+    divisionLeader = Column(Boolean)
+    wins = Column(Integer)
+    losses = Column(Integer)
+    winningPercentage = Column(String)
+    gamePk = Column(Integer)
+    team_id = Column(Integer)
+    leagueRecord_wins = Column(Integer)
+    leagueRecord_losses = Column(Integer)
+    leagueRecord_pct = Column(String)
+    
+class Player(Base):
+    __tablename__ = 'players'
+    __table_args__ = (
+        PrimaryKeyConstraint('id'),
+        {'extend_existing':True}
+    )
+    
+    id = Column(Integer)
+    firstName = Column(String)
+    lastName = Column(String)
+    fullName = Column(String)
+    primaryNumber = Column(String)
+    birthDate = Column(String)
+    currentAge = Column(String)
+    birthCity = Column(String)
+    birthStateProvince = Column(String)
+    birthCountry = Column(String)
+    height = Column(String)
+    weight = Column(String)
+    active = Column(Boolean)
+    useName = Column(String)
+    middleName = Column(String)
+    boxscoreName = Column(String)
+    nickName = Column(String)
+    gender = Column(String)
+    isPlayer = Column(Boolean)
+    isVerified = Column(Boolean)
+    draftYear = Column(Integer)
+    mlbDebutDate = Column(String)
+    nameSlug = Column(String)
+    strikeZoneTop = Column(Float)
+    strikeZoneBottom = Column(Float)
+    primaryPosition_name = Column(String)
+    primaryPosition_type = Column(String)
+    bateSide_description = Column('batSide',String)
+    pitchHand_description = Column('pitchHand',String)
+    pronunciation = Column(String)
+    lastPlayedDate = Column(String)
+    nameTitle = Column(String)
+    deathDate = Column(String)
+    deathCity = Column(String)
+    deathStateProvince = Column(String)
+    deathCountry = Column(String)
+    
+    
     
 ###################
 

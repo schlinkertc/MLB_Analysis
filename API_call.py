@@ -172,6 +172,7 @@ def get_runners(API_result):
             runners.append(flatten_dicts(runner))
     
     [r.update(gamePk) for r in runners]
+    [c.update(gamePk) for c in credits]
     return runners,credits
 
 def get_actions(API_result):
@@ -223,7 +224,8 @@ def get_teams(API_result):
         
         team_record = team.pop('record')
         team_record.update({'gamePk':gamePk})
-        team_records.append(team_record)
+        team_record['team_id']=team['id']
+        team_records.append(flatten_dicts(team_record))
         
         teams.append(flatten_dicts(team))
         
@@ -266,8 +268,8 @@ class API_call():
         # I don't want to change the underlying api response
         result = copy.deepcopy(self._result)
         
-        self.game = get_game(result)
-        self.venue = get_venue(result)
+        self.games = get_game(result)
+        self.venues = get_venue(result)
         self.teams, self.game_team_links, self.team_records = get_teams(result)
         self.players, self.game_player_links = get_players(result)
         self.plays,self.matchups,self.hotColdZones,self.hotColdStats = get_plays(result)
