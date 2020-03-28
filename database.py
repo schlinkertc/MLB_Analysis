@@ -1,6 +1,8 @@
 import os
 import sqlalchemy
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
 
 class MyDatabase:
     # http://docs.sqlalchemy.org/en/latest/core/engines.html
@@ -23,8 +25,72 @@ class MyDatabase:
             engine_url = self.DB_ENGINE[dbtype].format(DB=path+dbname)
             self.db_engine = create_engine(engine_url)
             print(self.db_engine)
+            
+            self.Base = declarative_base(bind=self.db_engine)
+            self.Base.metadata.create_all(self.db_engine)
         else:
             print("DBType is not found in DB_ENGINE")
+    
+    def insert_game(self,gamePk,method='IGNORE'):
+        gamePk = int(gamePk)
+        
+        if method == 'IGNORE':
+            q = self.db_engine.execute('select pk from games').fetchall()
+            existing_pks = [x[0] for x in q]
+
+            if gamePk in existing_pks:
+                return {'game':gamePk,
+                        'insert_status':'fail',
+                        'reason':'already exists'}
+            else:
+                try:
+                    call = API_call(gamePk)
+                except:
+                    return {'game':gamePk,
+                            'insert_status':'fail',
+                            'reason':'API call failed'}
+
+                mappers = [
+                    Game,Play,
+                    Pitch,
+                    Action,Runner,Credit,
+                    Matchup,Venue,
+                    Team,GameTeamLink,TeamRecord,
+                    Player,PitchData,HitData
+                ]
+
+                for mapper in mappers:
+                    insert_values = []
+
+                    table = mapper.__table__
+                    cols = [x.name for x in table.c]
+
+                    if mapper == HitData or mapper == PitchData:
+                        records = call.__dict__['pitches']
+                    else:
+                        records = call.__dict__[table.name]
+                    for record in records:
+                        insert_value = {}
+                        for k in cols:
+                            try:
+                                insert_value[k]=record[k]
+                            except KeyError:
+                                insert_value[k]=None
+                        insert_values.append(insert_value)
+
+                    conn = self.db_engine.connect()    
+                    try:
+                        conn.execute(table.insert(),insert_values)
+                        return {'game':gamePk,
+                                'insert_status':'success',
+                                'reason':'None'}
+                    except IntegrityError:
+                        return {'game':gamePk,
+                                'insert_status':'fail',
+                                'reason':'Integrity Error'}
+        if method == 'REPLACE':
+            return 'replace method needs to be done!'
+            
 
 from sqlalchemy import PrimaryKeyConstraint,ForeignKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
@@ -35,7 +101,7 @@ class Game(Base):
     __tablename__ = 'games'
     __table_args__ = (
         PrimaryKeyConstraint(
-            'id','detailedState',sqlite_on_conflict='IGNORE'
+            'id','pk',sqlite_on_conflict='REPLACE'
         ),
         {'extend_existing': True}
     )
@@ -563,6 +629,25 @@ class Player(Base):
     deathCity = Column(String)
     deathStateProvince = Column(String)
     deathCountry = Column(String)
+    
+class GamePlayerLink(Base):
+    __tablename__ = 'game_player_links'
+    __table_args__ = (
+        PrimaryKeyConstraint('person_id','gamePk','gameDateTime'),
+        {'extend_existing':True}
+    )
+    person_id = Column(Integer)
+    team_id = Column(Integer)
+    gamePk = Column(Integer)
+    gameDateTime = Column(String)
+    position_code = Column(String)
+    status_description = Column(String)
+    gameStatus_isCurrentBatter = Column(Boolean)
+    gameStatus_isCurrentPitcher = Column(Boolean)
+    gameStatus_isOnBench = Column(Boolean)
+    gameStatus_isSubstitute = Column(Boolean)
+    battingOrder = Column(String)
+    allPositions = Column(String)
     
     
     

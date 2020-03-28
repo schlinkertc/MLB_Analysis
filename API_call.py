@@ -212,12 +212,33 @@ def get_players(API_result):
     players = API_result['gameData']['players']
     players = [flatten_dicts(players[player_id]) for player_id in players.keys()]
     
-    game_player_links = []
-    for player in players:
-        link = {'player':player['id'],'gamePk':gamePk}
-        game_player_links.append(link)
+#     game_player_links = []
+#     for player in players:
+#         link = {'player':player['id'],'gamePk':gamePk}
+#         game_player_links.append(link)
     
-    return players,game_player_links
+    return players
+
+def get_gamePlayerLink(API_result):
+    gamePk={'gamePk':API_result['gamePk'],
+            'gameDateTime':API_result['gameData']['datetime']['dateTime']}
+    boxscore = API_result['liveData']['boxscore']
+    player_dicts = []
+    for team in ['home','away']:
+        players = boxscore['teams'][team]['players']
+        for k in players.keys():
+            player_dicts.append(flatten_dicts(players[k]))
+    
+    [p.update(gamePk) for p in player_dicts]
+    
+    for player_dict in player_dicts:
+        try:
+            player_dict['allPositions'] = ''.join(
+                [ d['code']+', ' for d in player_dict['allPositions'] ]
+            )
+        except KeyError:
+            continue 
+    return player_dicts
 
 def get_teams(API_result):
     #fk for game_team_link
@@ -279,11 +300,12 @@ class API_call():
         self.games = get_game(result)
         self.venues = get_venue(result)
         self.teams, self.game_team_links, self.team_records = get_teams(result)
-        self.players, self.game_player_links = get_players(result)
+        self.players = get_players(result)
         self.plays,self.matchups,self.hotColdZones,self.hotColdStats = get_plays(result)
         self.actions = get_actions(result)
         self.pitches = get_pitches(result)
         self.runners, self.credits = get_runners(result)
+        self.game_player_links = get_gamePlayerLink(result)
         
     def __repr__(self):
         return f"<API Call: gamePk={self._result['gamePk']}>"
