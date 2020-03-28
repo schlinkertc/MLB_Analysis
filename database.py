@@ -47,7 +47,7 @@ class Game(Base):
     gamedayType = Column(String(1))
     tiebreaker = Column(String(1))
     gameNumber = Column(Integer)
-    calendarEventId = Column(String(50))
+    calendarEventID = Column(String(50))
     season = Column(Integer)
 
     dateTime = Column(DateTime)
@@ -334,8 +334,9 @@ class Runner(Base):
     __tablename__ = 'runners'
     __table_args__ = (
         PrimaryKeyConstraint(
-            'atBatIndex','playEndTime','gamePk','details_playIndex','details_runner_id',
-            'movement_start'
+            'atBatIndex','playEndTime',
+            'gamePk','details_playIndex','details_runner_id',
+            'movement_start','movement_end','details_event'
         ),
         ForeignKeyConstraint(
             columns=['gamePk'],
@@ -440,7 +441,7 @@ class Matchup(Base):
 class Venue(Base):
     __tablename__ = 'venues'
     __table_args__ = (
-        PrimaryKeyConstraint('id'),
+        PrimaryKeyConstraint('id',sqlite_on_conflict='IGNORE'),
         {'extend_existing':True}
     )
     id = Column(Integer)
@@ -466,7 +467,7 @@ class Venue(Base):
 class Team(Base):
     __tablename__ = 'teams'
     __table_args__ = (
-        PrimaryKeyConstraint('id'),
+        PrimaryKeyConstraint('id',sqlite_on_conflict='IGNORE'),
         ForeignKeyConstraint(columns=['venue_id'],refcolumns=['venues.id']),
         {'extend_existing':True}
     )
@@ -522,7 +523,7 @@ class TeamRecord(Base):
 class Player(Base):
     __tablename__ = 'players'
     __table_args__ = (
-        PrimaryKeyConstraint('id'),
+        PrimaryKeyConstraint('id',sqlite_on_conflict='IGNORE'),
         {'extend_existing':True}
     )
     

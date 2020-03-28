@@ -173,6 +173,12 @@ def get_runners(API_result):
     
     [r.update(gamePk) for r in runners]
     [c.update(gamePk) for c in credits]
+    
+    for runner in runners:
+        if runner['movement_start']==None:
+            runner['movement_start']='-'
+        if runner['movement_end']==None:
+            runner['movement_end']= '-'
     return runners,credits
 
 def get_actions(API_result):
@@ -254,7 +260,7 @@ class API_call():
     pickled_calls = [x.strip('.pkl') for x in pickled_calls]
     
     def __init__(self,gamePk):
-        
+        gamePk = str(gamePk)
         storedResultsDirectory = "API_results/"
         self._pickle_path = str(storedResultsDirectory+gamePk+'.pkl')
         
@@ -277,36 +283,39 @@ class API_call():
         self.pitches = get_pitches(result)
         self.runners, self.credits = get_runners(result)
         
-class Games_DataFrames():
+    def __repr__(self):
+        return f"<API Call: gamePk={self._result['gamePk']}>"
+        
+# class Games_DataFrames():
 
-    def __init__(self,gamePks):
-        """
-        takes in a list of gamePks, instantiates API_call object for each game, 
-            returns dataframes for db inserts
-        """
-        self._calls = [API_call(gamePk) for gamePk in gamePks]
-        call_dict = {k:v for k,v in self._calls[0].__dict__.items() if k[0]!= '_'}
+#     def __init__(self,gamePks):
+#         """
+#         takes in a list of gamePks, instantiates API_call object for each game, 
+#             returns dataframes for db inserts
+#         """
+#         self._calls = [API_call(gamePk) for gamePk in gamePks]
+#         call_dict = {k:v for k,v in self._calls[0].__dict__.items() if k[0]!= '_'}
         
-        for k in call_dict.keys():
-            if type(call_dict[k])==dict:
-                v = []
-                v.append(call_dict[k])
-                call_dict[k]=v
-        for call in self._calls[1:]:
-            for k,v in call.__dict__.items():
-                try:
-                    call_dict[k].extend(v)
-                except KeyError:
-                    pass
+#         for k in call_dict.keys():
+#             if type(call_dict[k])==dict:
+#                 v = []
+#                 v.append(call_dict[k])
+#                 call_dict[k]=v
+#         for call in self._calls[1:]:
+#             for k,v in call.__dict__.items():
+#                 try:
+#                     call_dict[k].extend(v)
+#                 except KeyError:
+#                     pass
         
-        for k,v in call_dict.items():
-            setattr(self,k,v)
-        for k,v in self.__dict__.items():
-            if k[0] != '_':
-                try:
-                    setattr(self,k,pd.DataFrame.from_records(v))
-                except AttributeError:
-                    pass
+#         for k,v in call_dict.items():
+#             setattr(self,k,v)
+#         for k,v in self.__dict__.items():
+#             if k[0] != '_':
+#                 try:
+#                     setattr(self,k,pd.DataFrame.from_records(v))
+#                 except AttributeError:
+#                     pass
                     
         
 
