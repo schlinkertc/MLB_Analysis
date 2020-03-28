@@ -83,7 +83,7 @@ def get_plays(API_result):
         fks=['atBatIndex', 'playEndTime']
             
         matchup.update(
-            {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+            {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
         )
         for x in ['pitcher','batter']:
             hotColdZone =  matchup.pop(f"{x}HotColdZones")
@@ -95,7 +95,7 @@ def get_plays(API_result):
                 except KeyError:
                     pass
                 zone.update(
-                    {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+                    {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
                 )
                 zone.update({'type':x})
                 hotColdZones.append(flatten_dicts(zone))
@@ -115,7 +115,7 @@ def get_plays(API_result):
         for stat in stats:
             stat.update(gamePk)
             stat.update(
-                {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+                {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
             )
             hotColdStats.append(flatten_dicts(stat))
         
@@ -135,7 +135,7 @@ def get_pitches(API_result):
             fks=['atBatIndex', 'playEndTime']
             
             pitch.update(
-                {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+                {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
             )
             
             pitches.append(flatten_dicts(pitch))
@@ -158,13 +158,15 @@ def get_runners(API_result):
             fks=['atBatIndex', 'playEndTime']
             
             runner.update(
-                {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+                {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
             )
             try:
                 temp_credits = runner.pop('credits')
                 
                 for credit in temp_credits:
-                    credit.update({k:v for k,v in zip(fks,[play[fk] for fk in fks])})
+                    credit.update(
+                        {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
+                    )
                 
                     credits.append(flatten_dicts(credit))
             except KeyError:
@@ -195,7 +197,7 @@ def get_actions(API_result):
             fks=['atBatIndex', 'playEndTime']
             
             action.update(
-                {k:v for k,v in zip(fks,[play[fk] for fk in fks])}
+                {k:v for k,v in zip(fks,[play.get(fk,'-') for fk in fks])}
             )
             
             actions.append(flatten_dicts(action))
