@@ -77,3 +77,5 @@ def read_gamePks():
             seasonPks = list(reader)
         gamePks[season[0]] = [item for sublist in seasonPks for item in sublist]
     return gamePks
+
+gamePks = read_gamePks()
