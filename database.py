@@ -36,30 +36,34 @@ class MyDatabase:
     def insert_game(self,gamePk,method='IGNORE'):
         gamePk = int(gamePk)
         
+        status_report = []
+        
         if method == 'IGNORE':
             q = self.db_engine.execute('select pk from games').fetchall()
             existing_pks = [x[0] for x in q]
 
             if gamePk in existing_pks:
-                return {'game':gamePk,
-                        'insert_status':'fail',
-                        'reason':'already exists'}
+                status_report.append( 
+                    {'game':gamePk,
+                     'insert_status':'pass',
+                     'reason':'already exists'}
+                )
             else:
                 try:
                     call = API_call(gamePk)
                 except:
-                    return {'game':gamePk,
-                            'insert_status':'fail',
-                            'reason':'API call failed'}
+                    status_report.append(
+                        {'game':gamePk,
+                         'insert_status':'fail',
+                         'reason':'API call failed'}
+                    )
 
-                for table_name in self.meta.tables.keys():
-                    table = self.meta.tables[table_name]
+                for table in self.meta.tables.values():
+                    #table = self.meta.tables[table_name]
                     cols = [x.name for x in table.c]
                     
-                    if table_name in ['hit_data','pitch_data']:
-                        records = call.__dict__['pitches']
-                    else:
-                        records = call.__dict__[table.name]
+                    
+                    records = call.__dict__[table.name]
                     
                     insert_values = []
                     for record in records:
@@ -71,18 +75,39 @@ class MyDatabase:
                                 insert_value[k]=None
                         insert_values.append(insert_value)
 
-                    conn = self.db_engine.connect()    
+                    conn = self.db_engine.connect()
+                    initial_count = (
+                        conn.execute(
+                            f'select count(*) from {table.name}'
+                        ).fetchall()[0][0]
+                    )
                     try:
+                        
                         conn.execute(table.insert(),insert_values)
-                        return {'game':gamePk,
-                                'table':table_name,
-                                'insert_status':'success',
-                                'reason':'None'}
+                        
+                        after_count = (
+                            conn.execute(
+                                f'select count(*) from {table.name}'
+                            ).fetchall()[0][0]
+                        )
+                        
+                        status_report.append( 
+                            {'game':gamePk,
+                             'table':table.name,
+                             'insert_status':'success',
+                             'records_count':len(records),
+                             'records_added':after_count-initial_count,
+                             'reason':'None'})
+                        
                     except IntegrityError:
-                        return {'game':gamePk,
-                                'table':'table_name'
-                                'insert_status':'fail',
-                                'reason':'Integrity Error'}
+                        status_report.append( 
+                            {'game':gamePk,
+                             'table':table.name,
+                             'insert_status':'fail',
+                             'reason':'Integrity Error'}
+                        )
+            return status_report 
+                        
         if method == 'REPLACE':
             return 'replace method needs to be done!'    
     

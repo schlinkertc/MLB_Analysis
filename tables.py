@@ -557,5 +557,5 @@ class GamePlayerLink(db.Base):
     battingOrder = Column(String)
     allPositions = Column(String)
 
-if __name__ == '__main__':
+if __name__ != '__main__':
     db.Base.metadata.create_all()

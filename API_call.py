@@ -284,6 +284,7 @@ class API_call():
     
     def __init__(self,gamePk):
         gamePk = str(gamePk)
+        
         storedResultsDirectory = "API_results/"
         self._pickle_path = str(storedResultsDirectory+gamePk+'.pkl')
         
@@ -303,9 +304,28 @@ class API_call():
         self.players = get_players(result)
         self.plays,self.matchups,self.hotColdZones,self.hotColdStats = get_plays(result)
         self.actions = get_actions(result)
-        self.pitches = get_pitches(result)
         self.runners, self.credits = get_runners(result)
         self.game_player_links = get_gamePlayerLink(result)
+        
+        self.pitches = get_pitches(result)
+        
+        # parse pitches into hit data and pitch data 
+        def parse_records(record,key):
+            return len(
+                [x for x in record.keys() if key in x]
+            )
+        
+        self.hit_data = list(
+            filter(
+                lambda x: parse_records(x,'hitData')>0,
+                self.pitches)
+        )
+        
+        self.pitch_data = list(
+            filter(
+                lambda x: parse_records(x,'pitchData')>0,
+                self.pitches)
+        )
         
     def __repr__(self):
         return f"<API Call: gamePk={self._result['gamePk']}>"
