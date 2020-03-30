@@ -557,47 +557,144 @@ class GamePlayerLink(db.Base):
     battingOrder = Column(String)
     allPositions = Column(String)
     
-class BattingStats(db.Base):
-    __tablename__ = "batting_stats"
+class GameBattingStats(db.Base):
+    __tablename__ = "game_batting_stats"
     __table_args__ = (
         PrimaryKeyConstraint('gamePk','person_id','gameDateTime'),
         {'extend_existing':True}
     )
     
-    gamePk
-    person_id
-    gameDateTime
+    gamePk = Column('gamePk',Integer)
+    person_id = Column('person_id',Integer)
+    gameDateTime = Column('gameDateTime',String)
     
-    gamesPlayed
-    plateAppearances
-    atBats
-    hits
-    baseOnBalls
-    intentionalWalks
-    strikeOuts
-    hitByPitch
-    sacFlies
-    sacBunts
-    doubles
-    triples
-    homeRuns
-    totalBases
-    runs
-    groundOuts
-    flyOuts
-    stolenBases
-    caughtStealing
-    catchersInterference
-    groundIntoDoublePlay
-    groundIntoTriplePlay
-    leftOnBase
-    pickoffs
-    
-    
+    gamesPlayed = Column(Float)
+    plateAppearances = Column(Float)
+    atBats = Column(Float)
+    hits = Column(Float)
+    baseOnBalls = Column(Float)
+    intentionalWalks = Column(Float)
+    strikeOuts = Column(Float)
+    hitByPitch = Column(Float)
+    sacFlies = Column(Float)
+    sacBunts = Column(Float)
+    doubles = Column(Float)
+    triples = Column(Float)
+    homeRuns = Column(Float)
+    totalBases = Column(Float)
+    runs = Column(Float)
+    groundOuts = Column(Float)
+    flyOuts = Column(Float)
+    stolenBases = Column(Float)
+    caughtStealing = Column(Float)
+    catchersInterference = Column(Float)
+    groundIntoDoublePlay = Column(Float)
+    groundIntoTriplePlay = Column(Float)
+    leftOnBase = Column(Float)
+    pickoffs = Column(Float)
     
     
+# class SeasonBattingStats(db.Base):
+#     __tablename__ = "season_batting_stats"
+#     __table_args__ = (
+#         PrimaryKeyConstraint('gamePk','person_id','gameDateTime'),
+#         {'extend_existing':True}
+#     )
     
+#     gamePk
+#     person_id
+#     gameDateTime
     
+#     gamesPlayed
+#     plateAppearances
+#     atBats
+#     hits
+#     baseOnBalls
+#     intentionalWalks
+#     strikeOuts
+#     hitByPitch
+#     sacFlies
+#     sacBunts
+#     doubles
+#     triples
+#     homeRuns
+#     totalBases
+#     runs
+#     groundOuts
+#     flyOuts
+#     stolenBases
+#     caughtStealing
+#     catchersInterference
+#     groundIntoDoublePlay
+#     groundIntoTriplePlay
+#     leftOnBase
+#     pickoffs
+    
+#     avg
+#     obp
+#     slg
+#     ops
+#     babip
+    
+# class GamePitchingStats(db.base):
+#     __tablename__ = "season_batting_stats"
+#     __table_args__ = (
+#         PrimaryKeyConstraint('gamePk','person_id','gameDateTime'),
+#         {'extend_existing':True}
+#     )
+    
+#     gamePk
+#     person_id
+#     gameDateTime
+    
+#     groundOuts
+#     airOuts
+#     strikePercentage
+#     balks
+#     runs
+#     note
+#     pickoffs
+#     gamesPitched
+#     atBats
+#     caughtStealing
+#     wildPitches
+#     strikeOuts
+#     balls
+#     inheritedRunnersScored
+#     saveOpportunities
+#     inningsPitched
+#     earnedRuns
+#     hits
+#     hitBatsmen
+#     intentionalWalks
+#     stolenBasePercentage
+#     triples
+#     baseOnBalls
+#     wins
+#     shutouts
+#     runsScoredPer9
+#     gamesFinished
+#     sacFlies
+#     gamesPlayed
+#     numberOfPitches
+#     completeGames
+#     stolenBases
+#     homeRuns
+#     outs
+#     hitByPitch
+#     catchersInterference
+#     strikes
+#     saves
+#     inheritedRunners
+#     rbi
+#     doubles
+#     pitchesThrown
+#     battersFaced
+#     sacBunts
+#     gamesStarted
+#     homeRunsPer9
+#     flyOuts
+#     blownSaves
     
 
 if __name__ != '__main__':

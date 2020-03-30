@@ -327,6 +327,23 @@ class API_call():
                 self.pitches)
         )
         
+        self.game_batting_stats = (
+            [ 
+                { 
+                    k.replace('stats_batting_','') : v 
+                    for k,v in record.items() 
+                    if k.startswith('stats_batting_')
+                }
+
+                for record in self.game_player_links
+            ]
+        )
+        self.game_batting_stats = [
+            x for x in self.game_batting_stats 
+            if len(x.keys())>0
+        ]
+
+        
     def __repr__(self):
         return f"<API Call: gamePk={self._result['gamePk']}>"
         
