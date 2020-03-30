@@ -274,6 +274,23 @@ def get_venue(API_result):
     venue_list.append(venue)
     return venue_list
 
+def parse_gtl(records,prefix):
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    new_list = []
+    for record in records:
+        new_dict = {}
+        for k,v in record.items():
+            if k.startswith(f'{prefix}'):
+                new_dict[k.replace(f'{prefix}','')]=v
+            elif k in ['gamePk','person_id','gameDateTime']:
+                new_dict[k]=v
+            else:
+                continue
+        new_dict['gameDateTime'] = dt.strptime(new_dict['gameDateTime'],fmt)
+        if len(new_dict.keys())>3:
+            new_list.append(new_dict)
+    return new_list
+
 class API_call():
     
     pickled_calls = []
@@ -327,21 +344,8 @@ class API_call():
                 self.pitches)
         )
         
-        self.game_batting_stats = (
-            [ 
-                { 
-                    k.replace('stats_batting_','') : v 
-                    for k,v in record.items() 
-                    if k.startswith('stats_batting_')
-                }
-
-                for record in self.game_player_links
-            ]
-        )
-        self.game_batting_stats = [
-            x for x in self.game_batting_stats 
-            if len(x.keys())>0
-        ]
+        self.game_batting_stats = parse_gtl(self.game_player_links,'stats_batting_')
+        self.game_pitching_stats = parse_gtl(self.game_player_links,'stats_pitching_')
 
         
     def __repr__(self):
