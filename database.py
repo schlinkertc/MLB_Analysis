@@ -32,84 +32,97 @@ class MyDatabase:
             self.meta = self.Base.metadata
         else:
             print("DBType is not found in DB_ENGINE")
+            
+    def delete_game(self,gamePk):
+        tables = [ 
+            table.name for table in self.meta.tables.values()
+            if 'gamePk' in table.c
+        ]
+        
+        [ self.db_engine.execute(
+            f"delete from {table} where gamePk={gamePk}"
+        ) for table in tables ]
+        
+        self.db_engine.execute(f"delete from games where pk = {gamePk}")
+        
+        
     
-    def insert_game(self,gamePk,method='IGNORE'):
+    def insert_game(self,gamePk,replace=False):
         gamePk = int(gamePk)
         
         status_report = []
         
-        if method == 'IGNORE':
-            q = self.db_engine.execute('select pk from games').fetchall()
-            existing_pks = [x[0] for x in q]
+        if replace:
+            self.delete_game(gamePk)
 
-            if gamePk in existing_pks:
-                status_report.append( 
+        q = self.db_engine.execute('select pk from games').fetchall()
+        existing_pks = [x[0] for x in q]
+
+        if gamePk in existing_pks:
+            status_report.append( 
+                {'game':gamePk,
+                 'insert_status':'pass',
+                 'reason':'already exists'}
+            )
+        else:
+            try:
+                call = API_call(gamePk)
+            except:
+                status_report.append(
                     {'game':gamePk,
-                     'insert_status':'pass',
-                     'reason':'already exists'}
+                     'insert_status':'fail',
+                     'reason':'API call failed'}
                 )
-            else:
+
+            for table in self.meta.tables.values():
+                #table = self.meta.tables[table_name]
+                cols = [x.name for x in table.c]
+
+
+                records = call.__dict__[table.name]
+
+                insert_values = []
+                for record in records:
+                    insert_value = {}
+                    for k in cols:
+                        try:
+                            insert_value[k]=record[k]
+                        except KeyError:
+                            insert_value[k]=None
+                    insert_values.append(insert_value)
+
+                conn = self.db_engine.connect()
+                initial_count = (
+                    conn.execute(
+                        f'select count(*) from {table.name}'
+                    ).fetchall()[0][0]
+                )
                 try:
-                    call = API_call(gamePk)
-                except:
-                    status_report.append(
-                        {'game':gamePk,
-                         'insert_status':'fail',
-                         'reason':'API call failed'}
-                    )
 
-                for table in self.meta.tables.values():
-                    #table = self.meta.tables[table_name]
-                    cols = [x.name for x in table.c]
-                    
-                    
-                    records = call.__dict__[table.name]
-                    
-                    insert_values = []
-                    for record in records:
-                        insert_value = {}
-                        for k in cols:
-                            try:
-                                insert_value[k]=record[k]
-                            except KeyError:
-                                insert_value[k]=None
-                        insert_values.append(insert_value)
+                    conn.execute(table.insert(),insert_values)
 
-                    conn = self.db_engine.connect()
-                    initial_count = (
+                    after_count = (
                         conn.execute(
                             f'select count(*) from {table.name}'
                         ).fetchall()[0][0]
                     )
-                    try:
-                        
-                        conn.execute(table.insert(),insert_values)
-                        
-                        after_count = (
-                            conn.execute(
-                                f'select count(*) from {table.name}'
-                            ).fetchall()[0][0]
-                        )
-                        
-                        status_report.append( 
-                            {'game':gamePk,
-                             'table':table.name,
-                             'insert_status':'success',
-                             'records_count':len(records),
-                             'records_added':after_count-initial_count,
-                             'reason':'None'})
-                        
-                    except IntegrityError:
-                        status_report.append( 
-                            {'game':gamePk,
-                             'table':table.name,
-                             'insert_status':'fail',
-                             'reason':'Integrity Error'}
-                        )
-            return status_report 
-                        
-        if method == 'REPLACE':
-            return 'replace method needs to be done!'    
+
+                    status_report.append( 
+                        {'game':gamePk,
+                         'table':table.name,
+                         'insert_status':'success',
+                         'records_count':len(records),
+                         'records_added':after_count-initial_count,
+                         'reason':'None'})
+
+                except IntegrityError:
+                    status_report.append( 
+                        {'game':gamePk,
+                         'table':table.name,
+                         'insert_status':'fail',
+                         'reason':'Integrity Error'}
+                    )
+        return status_report 
     
 # ###################
 

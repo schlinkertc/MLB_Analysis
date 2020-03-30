@@ -556,6 +556,49 @@ class GamePlayerLink(db.Base):
     gameStatus_isSubstitute = Column(Boolean)
     battingOrder = Column(String)
     allPositions = Column(String)
+    
+class BattingStats(db.Base):
+    __tablename__ = "batting_stats"
+    __table_args__ = (
+        PrimaryKeyConstraint('gamePk','person_id','gameDateTime'),
+        {'extend_existing':True}
+    )
+    
+    gamePk
+    person_id
+    gameDateTime
+    
+    gamesPlayed
+    plateAppearances
+    atBats
+    hits
+    baseOnBalls
+    intentionalWalks
+    strikeOuts
+    hitByPitch
+    sacFlies
+    sacBunts
+    doubles
+    triples
+    homeRuns
+    totalBases
+    runs
+    groundOuts
+    flyOuts
+    stolenBases
+    caughtStealing
+    catchersInterference
+    groundIntoDoublePlay
+    groundIntoTriplePlay
+    leftOnBase
+    pickoffs
+    
+    
+    
+    
+    
+    
+    
 
 if __name__ != '__main__':
     db.Base.metadata.create_all()
