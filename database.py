@@ -1,4 +1,6 @@
 import os
+import joblib
+import pandas as pd
 import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -43,9 +45,7 @@ class MyDatabase:
             f"delete from {table} where gamePk={gamePk}"
         ) for table in tables ]
         
-        self.db_engine.execute(f"delete from games where pk = {gamePk}")
-        
-        
+        self.db_engine.execute(f"delete from games where pk = {gamePk}")  
     
     def insert_game(self,gamePk,replace=False):
         gamePk = int(gamePk)
@@ -123,6 +123,20 @@ class MyDatabase:
                          'reason':'Integrity Error'}
                     )
         return status_report 
+    
+    def pd_query(self,statement=None,name=None,storage_path='sql_queries/',load=False):
+        
+        if statement:
+            result = pd.read_sql(statement,self.db_engine)
+        
+        # if a name is specified, pickle the results and store
+        if name != None:
+            if load:
+                result = joblib.load(storage_path+self.name+'.pkl')['result']
+            else:
+                storage_dict = {'result':result,'statement':statement}
+                joblib.dump(storage_dict,storage_path+name+'.pkl')
+            return result
     
 # ###################
 
