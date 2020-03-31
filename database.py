@@ -47,7 +47,7 @@ class MyDatabase:
         
         self.db_engine.execute(f"delete from games where pk = {gamePk}")  
     
-    def insert_game(self,gamePk,replace=False):
+    def insert_game(self,gamePk,replace=False,return_status=False):
         gamePk = int(gamePk)
         
         status_report = []
@@ -122,7 +122,8 @@ class MyDatabase:
                          'insert_status':'fail',
                          'reason':'Integrity Error'}
                     )
-        return status_report 
+        if return_status:
+            return status_report 
     
     def pd_query(self,statement=None,name=None,storage_path='sql_queries/',load=False):
         
@@ -132,7 +133,7 @@ class MyDatabase:
         # if a name is specified, pickle the results and store
         if name != None:
             if load:
-                result = joblib.load(storage_path+self.name+'.pkl')['result']
+                result = joblib.load(storage_path+name+'.pkl')['result']
             else:
                 storage_dict = {'result':result,'statement':statement}
                 joblib.dump(storage_dict,storage_path+name+'.pkl')

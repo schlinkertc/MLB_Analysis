@@ -75,6 +75,7 @@ def get_plays(API_result):
     plays = []
     matchups = []
     hotColdZones = []
+    count = 1
     for play in allPlays:
         play_dict = {k:v for k,v in zip(keys,[play[key] for key in keys])}.copy()
         plays.append(flatten_dicts(play_dict))

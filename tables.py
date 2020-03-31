@@ -675,3 +675,9 @@ class GamePitchingStats(db.Base):
 
 if __name__ != '__main__':
     db.Base.metadata.create_all()
+    # Create visualization
+    import sqlalchemy_schemadisplay
+    from sqlalchemy import MetaData
+
+    schema_viz = sqlalchemy_schemadisplay.create_schema_graph(metadata=MetaData(db.db_engine))
+    schema_viz.write_png('images/dbschema.png')
