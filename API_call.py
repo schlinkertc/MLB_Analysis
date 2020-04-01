@@ -227,8 +227,13 @@ def get_gamePlayerLink(API_result):
     player_dicts = []
     for team in ['home','away']:
         players = boxscore['teams'][team]['players']
+        team_id = boxscore['teams'][team]['team']['id']
         for k in players.keys():
-            player_dicts.append(flatten_dicts(players[k]))
+            player_dict = flatten_dicts(players[k])
+            player_dict['team_id'] = team_id
+            player_dict['home_away'] = team
+            player_dicts.append(player_dict)
+            
     
     [p.update(gamePk) for p in player_dicts]
     

@@ -554,6 +554,7 @@ class GamePlayerLink(db.Base):
     )
     person_id = Column(Integer)
     team_id = Column(Integer)
+    home_away = Column(String)
     gamePk = Column(Integer)
     gameDateTime = Column(String)
     position_code = Column(String)
