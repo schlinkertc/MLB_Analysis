@@ -51,6 +51,7 @@ class MyDatabase:
         gamePk = int(gamePk)
         
         status_report = []
+        conn = self.db_engine.connect()
         
         if replace:
             self.delete_game(gamePk)
@@ -74,6 +75,8 @@ class MyDatabase:
                      'reason':'API call failed'}
                 )
 
+                return status_report
+
             for table in self.meta.tables.values():
                 #table = self.meta.tables[table_name]
                 cols = [x.name for x in table.c]
@@ -91,14 +94,13 @@ class MyDatabase:
                             insert_value[k]=None
                     insert_values.append(insert_value)
 
-                conn = self.db_engine.connect()
                 initial_count = (
                     conn.execute(
                         f'select count(*) from {table.name}'
                     ).fetchall()[0][0]
                 )
-                try:
 
+                try:
                     conn.execute(table.insert(),insert_values)
 
                     after_count = (
@@ -122,6 +124,8 @@ class MyDatabase:
                          'insert_status':'fail',
                          'reason':'Integrity Error'}
                     )
+        if conn.closed == False:
+            conn.close()
         if return_status:
             return status_report 
     
