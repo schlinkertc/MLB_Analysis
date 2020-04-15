@@ -11,22 +11,12 @@ It's also a hotbed for [statistical analysis](https://en.wikipedia.org/wiki/Base
 For this project, we'll perform a similar process for our analyses. Instead of using punch cards and magnetic tape, we'll use Python and the [SQLAlchemy ORM framework](https://docs.sqlalchemy.org/en/13/orm/index.html) for storing and accessing data gathered from the MLB API, explore our data with visualizations in Plotly, and perform statistical analysis with Pandas and scikit-learn. 
 
 
-## MLB Stats API and SQLAlchemy ORM
-*explain how and why we build the RDB*
+### MLB Stats API and SQLAlchemy ORM
+The MLB stats API returns an exceptional amount of information for every game. The first and most substantial part of this project was parsing the information from a single game's API into a normalized database. The work was worth it because storing this information systematically means that I don't have to return to the API to perform my analysis, and I'll have the information ready for future projects. 
 
-## Statistical Testing
+Our database allows us to store and retrieve comprehensive data on games, players, teams, team records, pitches, plays, runners, and the relationships between them. In it's current form, the database stores this information in 17 different tables.
 
-### One-Sample T-test
-
-The Houston Astros have been caught cheating, and the baseball world is angry. When rules are broken in basball, opposing players will often retaliate by sending an unspoken message: they hit the batters with a pitch. So far, the in-game fallout from the Astros cheating scandal has only taken place in spring training of the 2020 season. We'll run a one-sample t-test to determine whether Astros players have been unusually targeted by opposing pitchers. 
-
-#### Questions to Consider: How can we tell if a batter was hit on purpose? 
-- If I was going to send a message by hitting a batter, I'd probably do it on the first pitch, and that pitch would be a little softer than a competitive fastball. Maybe we can use these assumptions to determine wheter batters were purposefully targeted or if the pitcher just made a mistake. 
-- If this pitcher has a tendency to throw innacurately, there's a better chance there was no intended retaliatory message. 
-
-### Analysis of Variance in Different Stadiums
-
-The Colorado Rockies play their home games at Coors Field where the altitude is higher than any other stadium in professional baseball. This has a [dramatic effect](http://baseball.physics.illinois.edu/Denver.html) on the aerodynamic forces that influence trajectory of hit baseballs. It's known as the "Coors Field Effect". We'll use ANOVA tests to show this effect. 
+The SQL Alchemy ORM framework facilitates a connection between Python objects and SQL records. 
 
 ## Statistical Modeling
 
@@ -34,5 +24,5 @@ The Colorado Rockies play their home games at Coors Field where the altitude is 
 
 ![Branch Rickey. Life Magazine, 1954](images/Rickey_obp.jpg)
 
-
+In 
 ### Predicting the Next Pitch 
