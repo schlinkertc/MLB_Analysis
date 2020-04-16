@@ -11,6 +11,8 @@ from sqlalchemy.orm import sessionmaker
 Session = sessionmaker(bind=db.db_engine)
 session = Session()
 
+engine = db.db_engine
+
 def get_game_features(game_record):
     date = dt.strftime(game_record.dateTime,"%Y-%m-%d")
     pk = game_record.pk
@@ -183,4 +185,4 @@ data['homeTeam_win'] = data.apply(lambda x: get_homeTeam_win(x['gamePk']),axis=1
 
 data.dropna(inplace=True)
 
-data.to_csv('game_dataset.csv',index=False)
+data.to_csv('game_dataset2.csv',index=False)
