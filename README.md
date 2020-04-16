@@ -40,4 +40,4 @@ I tried 3 different models: logistic regression, a linear support vector machine
 
 In the end, my model did not produce stellar results. Branch Rickey's features have proven to succesfully determine who is the better team over a the course of a season, but Baseball is a unique sport in that the better team often loses. Even the most elite team will lose over 60 games a year. To improve this model in the future, I'll need to consider what features might explain when the better team loses. Factors like pitcher rest or travel distance might be useful. 
 
-
+However, I was able to increase weighted-average precision over my base estimator from 48% to 56%. I can call this first experiment a moderate success, and I can look forward to more modeling and experiments using the data schema I've created. 
